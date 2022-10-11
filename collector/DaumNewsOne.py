@@ -24,6 +24,10 @@ from bs4 import BeautifulSoup
 # bs4라는 책에서 BeautifulSoup 1개 파트만 빌려옴
 
 # 목표 : Daum 뉴스 웹페이지 제목과 내용 데이터를 수집!
+# 1) request로 해당 URL의 전체 소스코드를 가지고 온다.
+# 2) Beautifulsoup에게 전체 소스코드 전달 -> doc
+# 3) bs4가 전체소스코드에서 원하는 데이터만 select
+
 # 1. url : https://v.daum.net/v/20221006080402550
 url = 'https://v.daum.net/v/20221006080402550'
 # 2. requests로 해당 url의 html 전체 코드를 수집!
@@ -35,8 +39,19 @@ result = requests.get(url)
 
 # 3.beautifulsoup를 통해서 '제목과 본문'만 추출
 doc = BeautifulSoup(result.text, 'html.parser')
-title = doc.select('h3.tit_view')[0].get_text()
-#.get_text() text값만 뽑아준다.
+title = doc.select('h3.tit_view')[0].get_text()  # h3 태그 중에 이름이 tit_view를 갖는 select
+# html -> tag + 선택자
+# - tag : 기본적으로 정의 돼있음 (h3, p, div, span, ...)
+contents = doc.select('section p')  # section 태그를 부모로 둔 모든 자식 p태그들 수집
+# title, contents 에서 s의 차이 (단수와 복수의 차이)
+# .get_text() text 값만 뽑아 준다.
 # 자동완성 단축키 ctrl + space
 
 print(f'뉴스제목: {title}')
+# contents = [<p1>, <p2>, <p3>, <p4>, .....] : 복수의 본문 포함
+# <p1> = <p> 블라블라블라 </p>
+
+content = ''
+for line in contents:
+    content += line.get_text()
+print(f'뉴스 본문: {content}')
