@@ -51,19 +51,39 @@ def movie_review_crawler(movie_code):
 
     # 해당 페이지 리뷰 수집
     count = 0  # 전체 리뷰 수를 count
-    for page in range(1, pages+1):
+    for page in range(1, pages + 1):
         url = f'https://movie.naver.com/movie/bi/mi/pointWriteFormList.naver?code={movie_code}&type=after' \
-          f'&isActualPointWriteExecute=false&isMileageSubscriptionAlready=false&isMileageSubscriptionReject=false' \
-          f'&page={page}'
+              f'&isActualPointWriteExecute=false&isMileageSubscriptionAlready=false&isMileageSubscriptionReject=false' \
+              f'&page={page}'
         result = requests.get(url)
         doc = BeautifulSoup(result.text, 'html.parser')
         review_list = doc.select('div.score_result > ul > li')  # 1page 리뷰 10건
 
         for i, one in enumerate(review_list):  # review 1건씩 수집
-            # 리뷰, 평점, 작성자, 작성 일자
+            # 리뷰, 평점, 작성자, 작성 일자 + 전처리
             review = one.select('div.score_reple > p > span')[-1].get_text().strip()
             score = one.select('div.star_score > em')[0].get_text()
-            print(f'# Review: {review}')
-            print(f'# Score : {score}')
 
-        break
+            # 날짜 시간 -> 날짜만 추출
+            # - 예 : 2022.10.19 15.28 -> 2022.10.19
+            # - 날짜는 항상 16글자로 구성
+            original_date = one.select('div.score_reple dt > em')[-1].get_text()
+            date = original_date[:10]
+
+
+
+
+            original_writer = one.select('div.score_reple dt > em')[0].get_text().strip()
+            idx_end = original_writer.find('(')
+            writer = original_writer[:idx_end]
+
+
+
+            count += 1
+            print(f"#########################################{count}번째 review"
+                  f"###################################################")
+            print(f'# Review: {review}')
+            print(f'# Writer : {writer}')
+            print(f'# Score : {score}')
+            print(f'# Date : {date}')
+
