@@ -2,6 +2,7 @@ import requests
 import re
 import math
 from bs4 import BeautifulSoup
+from db.database import create_review
 
 
 ###################
@@ -70,14 +71,9 @@ def movie_review_crawler(movie_code):
             original_date = one.select('div.score_reple dt > em')[-1].get_text()
             date = original_date[:10]
 
-
-
-
             original_writer = one.select('div.score_reple dt > em')[0].get_text().strip()
             idx_end = original_writer.find('(')
             writer = original_writer[:idx_end]
-
-
 
             count += 1
             print(f"#########################################{count}번째 review"
@@ -86,4 +82,23 @@ def movie_review_crawler(movie_code):
             print(f'# Writer : {writer}')
             print(f'# Score : {score}')
             print(f'# Date : {date}')
+            # Review 데이터 생성
+            # -> 규격(포멧) -> JSON
+            # JSON -> 데이터 주고받을 때 많이 사용하는 타입
+            # MongoDB -> BSON(Binary JSON) = JSON
+            # Python의 Dictionary = JSON
+            #
+            # ※ Python Dictionary = JSON = BSON
+            # JSON 포멧
+            # {key:value, Key:value, Key:value}
 
+            # Dict type은 데이터 꺼낼 때 key값
+            # List type은 데이터 꺼낼 때 index값
+            data = {
+                'title': title,
+                'score': score,
+                'review': review,
+                'writer': writer,
+                'date': date
+            }
+            create_review(data)
